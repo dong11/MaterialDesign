@@ -1,5 +1,6 @@
 package com.dong.huang.materialdesign;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -89,8 +90,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 if(item.getItemId() == R.id.navItem3){
-                    Log.i("123","---点击了抽屉菜单--->");
                     mDrawerLayout.closeDrawers();
+                    Intent intent = new Intent(MainActivity.this, TabLayoutActivity.class);
+                    startActivity(intent);
                 }
                 return false;
             }
