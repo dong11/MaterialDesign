@@ -20,6 +20,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +51,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initInstances();
+
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    http();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     private void initInstances() {
@@ -158,4 +182,86 @@ public class MainActivity extends AppCompatActivity {
         params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
         listView.setLayoutParams(params);
     }
+
+    private void http() throws IOException, JSONException {
+        URL url = new URL("http://114.215.249.55:9188/iphone/content/mmbMemberInfoAction!login");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        conn.setUseCaches(false);
+        conn.setRequestMethod("POST");
+
+        String str = "account=admin@163.com&password=admin";
+
+        //3459548F41BA1A7315A28257A0E5F3B4
+        //3459548F41BA1A7315A28257A0E5F3B4
+
+
+        DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+
+        out.writeBytes(str);
+        out.flush();
+        out.close();
+
+        String cookieval = conn.getHeaderField("set-cookie");
+
+        Log.i("123","------>" + cookieval);
+
+        String sessionid = "";
+        if(cookieval != null) {
+            sessionid = cookieval.substring(0, cookieval.indexOf(";"));
+        }
+
+        Log.i("123", "----->" + sessionid);
+
+        Log.i("123","---->" + conn.getResponseCode());
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+        String response = "";
+        String line;
+        while ((line = reader.readLine()) != null) {
+            response += line;
+        }
+
+        Log.i("123", "----->" + response);
+
+        /*JSONObject jsonObject = new JSONObject(response);
+        JSONObject object = jsonObject.optJSONArray("result").getJSONObject(0);
+        sessionid = object.optString("sessionId");*/
+
+
+
+        Log.i("123","----->" + sessionid);
+
+        HttpURLConnection con = (HttpURLConnection) new URL("http://114.215.249.55:9188/iphone/content/mmbMemberInfoAction!logOut").openConnection();
+        con.setDoOutput(true);
+        con.setDoInput(true);
+        con.setUseCaches(false);
+        con.setRequestMethod("POST");
+
+        con.setRequestProperty("Cookie", sessionid);
+
+        Log.i("123", "----->" + sessionid);
+
+        String str2 = "sessionId=" + sessionid;
+
+       /* DataOutputStream out2 = new DataOutputStream(con.getOutputStream());
+
+        Log.i("123","----->" + str2);
+
+        out2.writeBytes(str2);
+        out2.flush();
+        out2.close();*/
+
+        BufferedReader reader1 = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+        String response1 = "";
+        String line1;
+        while ((line1 = reader1.readLine()) != null) {
+            response1 += line1;
+        }
+
+        Log.i("123","----->" + response1);
+    }
+
 }
